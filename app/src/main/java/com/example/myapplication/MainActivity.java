@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
 //    //动态获取内存存储权限
 //    public static void verifyStoragePermissions(Activity activity) {
 //        // Check if we have write permission
@@ -73,20 +71,18 @@ public class MainActivity extends AppCompatActivity {
         //Log.e("myongk", myURL );
         //String addres = "https://ip4167885180.mobgslb.tbcache.com/fs01/union_pack/PPAssistant_3376273_PP_67.apk?ali_redirect_domain=alissl.ucdl.pp.uc.cn&ali_redirect_ex_ftag=acc4082e9712c2aa13b9b4df78965687dc624573e138d533&ali_redirect_ex_tmining_ts=1632550148&ali_redirect_ex_tmining_expire=3600&ali_redirect_ex_hot=100";
 
-
-        Log.e("myongk", "kkkkkk" );
         URL url = new URL(addres);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setConnectTimeout(5000);
         con.setReadTimeout(60000);
-        //问题⑤
+        //问题⑤ post类型DoOutput需要false
         con.setDoOutput(false);
         con.setDoInput(true);
 
         //con.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
         //String ff = connection.getHeaderField("filename");
-        //问题④获取包的名字问题
+
 
         //获取下载文件的头
         //String raw = URLDecoder.decode(connection.getHeaderField("Content-Disposition"),"UTF-8");
@@ -100,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //
 //        System.out.print(file_name);
+        //问题④获取包的名字问题，调用api不行，只能解析url得到
         String ff = con.getURL().getFile();
         System.out.println(ff);
         System.out.println(ff.substring(ff.lastIndexOf('/')+1));
@@ -108,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         int loc = ff1.indexOf("?");
         System.out.println(ff1.substring(0,loc));
         int ret = con.getResponseCode();
-        Log.e("myongk", "downLoadFile: "+ret);
+        //Log.e("myongk", "downLoadFile: "+ret);
         InputStream is = con.getInputStream();
 
 
@@ -117,24 +114,37 @@ public class MainActivity extends AppCompatActivity {
         System.out.println(size);
 
         File saveDir = new File(path);
-        Log.e("myongk", path);
+
         if (!saveDir.exists()) {
             saveDir.mkdir();
         }
-        File file1 = new File(saveDir+File.separator+0+ff1.substring(0,loc));
-        OutputStream file = new FileOutputStream(file1);
-        Log.e("myongk", saveDir+ff1.substring(0,loc));
-        OutputStream os = new BufferedOutputStream(file);
+
+        //这里下载明在得加0，不然出现如下错误
+        //java.io.FileNotFoundException: /storage/emulated/0/Download/PPAssistant_3376273_PP_67.apk: open failed: EEXIST (File exists)
+        //该问题还没找到答案
+        File file = new File(saveDir+File.separator+0+ff1.substring(0,loc));
+
+        if(!file.exists()){
+            file.createNewFile();
+        }
+        //file1.createNewFile();
+
+        OutputStream ops = new FileOutputStream(file,false);
+
+        //Log.e("myongk", saveDir+ff1.substring(0,loc));
+        OutputStream os = new BufferedOutputStream(ops);
+
         byte[] buff = new byte[1024];
         int len = 0;
         int cur = 0;
-        System.out.print("hello1");
-        Log.e("myongk", "downLoadFile: "+size);
+        //System.out.print("hello1");
+        //Log.e("myongk", "downLoadFile: "+size);
         while((len=is.read(buff))!=-1){
             os.write(buff,0,len);
             cur += len;
             //System.out.print("hello");
             float process = (float)cur/(float)size*100;
+            //获取下载进度
             text.setText(String.valueOf(process)+ "%");
             //System.out.println((int)process);
             //System.out.println(sum);
