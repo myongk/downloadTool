@@ -53,7 +53,8 @@ public class downloadTool {
 //            InputStream inputStream = connection.getInputStream();
 //            //String result = getStringFromStream(inputStream);
 //        }
-
+        stop = false;
+        cancel = false;
         URL url = new URL(downloadURL);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -125,8 +126,8 @@ public class downloadTool {
 
 
 
-                String fileName = "base.apk";
-                File saveDir = new File(fileName);
+                //String fileName = "base.apk";
+                File saveDir = new File(localPath);
                 if (!saveDir.exists()) {
                     saveDir.mkdir();
                 }
