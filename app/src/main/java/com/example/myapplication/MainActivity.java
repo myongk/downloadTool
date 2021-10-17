@@ -16,6 +16,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.test.www.downloadTool;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -171,6 +173,13 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+
+                try {
+                    downloadTool downloadtool = new downloadTool(myURL,3);
+                    downloadtool.startDownload();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 //问题①：类型转换
                 String myURL = editText.getText().toString();
