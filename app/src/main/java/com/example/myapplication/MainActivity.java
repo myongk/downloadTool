@@ -30,12 +30,20 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
     Button button;
+    Button stop;
+    Button cancel;
     EditText editText;
     TextView text;
     String myURL;
     String val;
+
+    downloadTool DownloadTool = new downloadTool();
+
     //问题③下载路径问题
     final String path = Environment.getExternalStorageDirectory().getPath() + "/Download/";
+
+    public MainActivity() throws IOException {
+    }
 
 
     //问题②动态权限
@@ -166,20 +174,29 @@ public class MainActivity extends AppCompatActivity {
 
         requestAllPower();
         button = findViewById(R.id.button);
+        stop = findViewById(R.id.stop);
+        cancel = findViewById(R.id.cancel);
         editText = findViewById(R.id.textView);
         text = findViewById(R.id.textView2);
 
         text.setText("0" + "%");
+        //downloadTool DownloadTool = null;
+//        downloadTool DownloadTool = null;
+//        try {
+//            DownloadTool = new downloadTool();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
 
-                try {
-                    downloadTool downloadtool = new downloadTool(myURL,3);
-                    downloadtool.startDownload();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    //downloadTool downloadtool = new downloadTool(myURL,3);
+//                    //.startDownload();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 
                 //问题①：类型转换
                 String myURL = editText.getText().toString();
@@ -187,18 +204,47 @@ public class MainActivity extends AppCompatActivity {
                 //Toast.makeText(MainActivity.this, myURL, Toast.LENGTH_SHORT).show();
                 System.out.println(val);
 
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            downLoadFile();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }).start();
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            downLoadFile();
+
+                            DownloadTool.startDownload(myURL,3);
+                            text.setText(String.valueOf(DownloadTool.process)+ "%");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                 }).start();
 
+
+
                 //Toast.makeText(getApplicationContext(),URL,Toast.LENGTH_LONG).show();
+            }
+        });
+
+        stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DownloadTool.stopDownload();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DownloadTool.cancelDownload();
             }
         });
     }
