@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -9,6 +10,8 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     TextView text;
     String myURL;
     String val;
+
+    Handler mHandler = null;
 
     downloadTool DownloadTool = new downloadTool();
 
@@ -179,7 +184,17 @@ public class MainActivity extends AppCompatActivity {
         editText = findViewById(R.id.textView);
         text = findViewById(R.id.textView2);
 
-        text.setText("0" + "%");
+
+
+        mHandler = new Handler(
+
+        ){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+                text.setText(msg.what + "%");
+            }
+        };
         //downloadTool DownloadTool = null;
 //        downloadTool DownloadTool = null;
 //        try {
@@ -220,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         try {
 
-                            DownloadTool.startDownload(myURL,3);
+                            DownloadTool.startDownload(myURL,3,mHandler);
                             text.setText(String.valueOf(DownloadTool.process)+ "%");
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -228,7 +243,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).start();
 
-
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        while ()
+//                        text.setText(String.valueOf(DownloadTool.process)+ "%");
+//                    }
+//                }).start();
 
                 //Toast.makeText(getApplicationContext(),URL,Toast.LENGTH_LONG).show();
             }

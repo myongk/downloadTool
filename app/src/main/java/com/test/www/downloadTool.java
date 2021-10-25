@@ -1,6 +1,8 @@
 package com.test.www;
 
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -21,7 +23,13 @@ public class downloadTool {
     int threadCount;
     Boolean stop = false;
     Boolean cancel = false;
-    public float process = 0;
+    public int process = 0;
+
+    float sum_size = 0;
+    float down_size = 0;
+    Handler myHandler = null;
+
+
     final String path = Environment.getExternalStorageDirectory().getPath() + "/Download/";
     String localPath = path;
     File target_file;
@@ -48,7 +56,7 @@ public class downloadTool {
         int loc = ff1.indexOf("?");
         System.out.println(ff1.substring(0,loc));
         //localPath = path+File.separator+0+ff1.substring(0,loc);
-        localPath = path+File.separator+11+ff1.substring(0,loc);
+        localPath = path+File.separator+26+ff1.substring(0,loc);
 
         File saveDir = new File(path+File.separator);
         Log.e("kkk", "saveDir: "+ saveDir.exists());
@@ -79,7 +87,7 @@ public class downloadTool {
     }
 
 
-    public void startDownload(String downloadURL, int threadCount) throws IOException {
+    public void startDownload(String downloadURL, int threadCount, Handler handler) throws IOException {
 //        URL url = new URL(downloadURL);
 //        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 //        connection.setRequestMethod("GET");
@@ -101,9 +109,12 @@ public class downloadTool {
 
         this.downloadURL = downloadURL;
         this.threadCount = threadCount;
+        this.myHandler = handler;
 
         this.cancel = false;
         this.stop = false;
+        this.process = 0;
+        this.down_size = 0;
 
 
         URL url = new URL(downloadURL);
@@ -115,15 +126,6 @@ public class downloadTool {
         connection.setDoOutput(false);
         connection.setDoInput(true);
 
-
-
-
-
-
-
-
-
-
         //connection.setRequestProperty("Range","bytes=0-20");
         Log.e("myongk1", "startDownload: ");
         int code = connection.getResponseCode();
@@ -134,6 +136,7 @@ public class downloadTool {
             getFileName(connection);
             //获取要下载的文件长度
             int length = connection.getContentLength();
+            this.sum_size = length;
             Log.e("myongk1", "startDownload1: "+length);
             Log.e("myongk1", "startDownloadkkkk: ");
             //在本地创建一个一样大小的文件
@@ -197,7 +200,11 @@ public class downloadTool {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
                     String result = reader.readLine();
                     //读出记录下来的位置更新下载请求数据的起始位置
-                    startIndex = Integer.parseInt(result);
+                    int res = Integer.parseInt(result);
+                    synchronized (this){
+                        down_size  = down_size + (res-this.startIndex);
+                    }
+                    this.startIndex = res;
                 }
 
 
@@ -239,8 +246,20 @@ public class downloadTool {
                         temp1.write(String.valueOf(position).getBytes());
 
                         synchronized (this){
+                            Log.e("myongk1", "threadId: " + threadId + "   " + "count:" + count + "    "+"sum " + sum);
                             float cur_process = (float)count/(float)(sum)*100;
-                            process+=cur_process/threadNum;
+                            down_size+=len;
+                            Log.e("myongk1", "threadId: " + threadId + "   " + "sum_size:" + sum_size );
+                            //process+=(cur_process/threadNum);
+                            process = (int) (down_size*100/sum_size);
+                            if( (sum_size - down_size )<1 ){
+                                process = 100;
+                            }
+                            Message msg = new Message();
+                            msg.what = process;
+                            myHandler.sendMessage(msg);
+
+                            Log.e("myongk1", "threadId: " + threadId + "   " + "process:" + process );
                         }
                         if(cancel){
                             if(temp.exists()){
